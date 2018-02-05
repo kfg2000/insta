@@ -13,7 +13,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.id)
+        return self.id
 
 
 class Profile(models.Model):
@@ -22,6 +22,15 @@ class Profile(models.Model):
     birth_date = models.DateField(null=True, default=timezone.now().date())
     profilePic = models.ImageField(upload_to="post_images")
 
+class Connection(models.Model):
+    follower = models.ForeignKey(User, related_name='follower', on_delete=models.CASCADE)
+    following = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{} : {}".format(
+            self.follower.username,
+            self.following.username
+        )
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -32,4 +41,11 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+
 

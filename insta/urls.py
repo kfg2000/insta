@@ -22,11 +22,15 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('account/<int:author_id>', views.detail, name='detail'),
     path('create/', views.create, name='create'),
     path('signup/', views.usersignup, name='signup'),
     path('login/', views.userlogin, name='login'),
     path('logout/', views.userlogout, name='logout'),
     path('profile/', views.updateprofile, name='profile'),
+    path('ajax_like/<int:post_id>/', views.ajax_like, name="like_button"),
+    path('search/', views.search, name='search'),
+
 ]
 
 if settings.DEBUG:

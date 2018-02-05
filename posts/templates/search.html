@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Search
+{% endblock title %}
+
+
+{% block content %}
+<div class="row">
+    {% for user in users %}
+    <div class="card" style="width: 20rem;">
+    <a class="card-text" href="{% url 'detail' author_id=user.id %}">{{user}}</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock content %}
