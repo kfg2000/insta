@@ -18,74 +18,58 @@ Home
     <p class="card-text">{{user.profile.bio}}</p>
         </div>
       {% endif %}
-  </p>
+    </p>
     <p class="lead">
-    <a class="btn btn-primary btn-lg" href="{% url 'create' %}" role="button">Create</a>
-  </p>
+        {% if following %}
+        <a class="btn btn-primary btn-lg" href="{% url 'unfollow' author_id=user.id %}" role="button">unfollow</a>
+        {% else %}
+        <a class="btn btn-primary btn-lg" href="{% url 'follow' author_id=user.id %}" role="button">follow</a>
+        {% endif %}
+    </p>
 </div>
 </div>
+
 <div class="rows">
     {% for item in list %}
 	<div class="card" style="width: 20rem;">
         <p class="card-text">{{item.timestamp}}</p>
-        {% if item.image %}
-        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img class="d-block w-100" src="{{item.image.url}}" alt="First slide">
-    </div>
-      {% if item.image2 %}
-    <div class="carousel-item">
-      <img class="d-block w-100" src="{{item.image2.url}}" alt="Second slide">
-    </div>
-      {% endif %}
-      {% if item.image3 %}
-    <div class="carousel-item">
-      <img class="d-block w-100" src="{{item.image3.url}}" alt="Third slide">
-    </div>
-      {% endif %}
-  </div>
-  <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="sr-only">Previous</span>
-  </a>
-  <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="sr-only">Next</span>
-  </a>
-</div>
+        {% if item.post.image %}
+			<img class="img-fluid" src="{{item.post.image.url}}" alt="Card image cap">
 		{% endif %}
-        <div class="btn btn-secondary" onclick="ajax_like({{item.id}})">
-		    <span id="like_count">{{like_count}}</span>
-		    <span ><i id="heart" class="fa fa-heart {% if liked %}text-danger{% endif %}" aria-hidden="true"></i></span>
-	    </div>
-        <p class="card-text">{{item.author}}: {{item.content}}</p>
+        <button class="btn" onclick="ajax_like({{item.post.id}})">
+            <span id="like_count_for_{{item.post.id}}">{{item.like_count}}</span>
+		    <span ><i id="{{item.post.id}}" class="fa fa-heart {% if item.liked %}text-danger{% endif %}" aria-hidden="true"></i></span>
+        </button>
+
+
+        <p class="card-text">{{item.post.author}}: {{item.post.content}}</p>
 	</div>
 {% endfor %}
+    </div>
 </div>
 
 <script type="text/javascript">
-	function ajax_like(id)
-	{
-		$.ajax(
-			{
-				type:'GET',
-				url:'/ajax_like/'+id+'/',
-				error:function(){
-					console.log("OMG WHAT DID YOU DO!")
-				},
-				success:function(data){
-					$("#like_count").text(data.like_count);
-					if(data.action==="like"){
-						$("#heart").addClass("text-danger");
-					}
-					else{
-						$("#heart").removeClass("text-danger");
-					}
-				},
-			});
-	}
+    function ajax_like(id) {
+        num = "#like_count_for_"+id
+        $.ajax(
+            {
+                type:'GET',
+                url: '/ajax_like/'+id,
+                error: function(){
+                    console.log('error');
+                },
+                success: function(data){
+                    $(num).text(data.post_like_count);
+
+                    if(data.action==="like"){
+                        $("#"+id).addClass("text-danger");
+                    }else{
+                        $("#"+id).removeClass("text-danger");
+                    }
+                },
+            }
+        );
+    }
 </script>
 
 {% endblock content %}

@@ -28,9 +28,11 @@ urlpatterns = [
     path('login/', views.userlogin, name='login'),
     path('logout/', views.userlogout, name='logout'),
     path('profile/', views.updateprofile, name='profile'),
-    path('ajax_like/<int:post_id>/', views.ajax_like, name="like_button"),
     path('search/', views.search, name='search'),
-
+    path('follow/<int:author_id>', views.follow, name='follow'),
+    path('unfollow/<int:author_id>', views.unfollow, name='unfollow'),
+    path('feed/', views.feed, name='feed'),
+    path('ajax_like/<int:post_id>', views.ajax_like, name='ajax_like'),
 ]
 
 if settings.DEBUG:

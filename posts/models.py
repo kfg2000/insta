@@ -6,13 +6,11 @@ from django.utils import timezone
 
 class Post(models.Model):
     image = models.ImageField(upload_to="post_images")
-    image2 = models.ImageField(upload_to="post_images", null=True, blank=True)
-    image3 = models.ImageField(upload_to="post_images", null=True, blank=True)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
-    author = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
-
-    def __str__(self):
+    author = models.ForeignKey(User, default=1, on_delete=models.CASCADE, related_name='author')
+    liked_by = models.ManyToManyField(User)
+    def __int__(self):
         return self.id
 
 
@@ -31,6 +29,12 @@ class Connection(models.Model):
             self.follower.username,
             self.following.username
         )
+class Comment(models.Model):
+	timestamp = models.DateTimeField(auto_now_add=True)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	post = models.ForeignKey(Post, on_delete=models.CASCADE)
+	blob = models.TextField()
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -41,11 +45,4 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-
-class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-
-
 

@@ -1,11 +1,11 @@
 from django import forms
-from .models import Post, Profile
+from .models import Post, Profile, Comment
 from django.contrib.auth.models import User
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['image', 'image2', 'image3', 'content',]
+        fields = ['image', 'content',]
 
 class UserSignup(forms.ModelForm):
     class Meta:
@@ -33,3 +33,8 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['blob']

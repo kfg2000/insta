@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from .models import Post, Like
+from django.http import JsonResponse
+from .models import Post, Connection
 from .forms import PostForm
 from .forms import UserSignup, UserLogin, UserForm, ProfileForm
 from django.contrib.auth import authenticate, login, logout
@@ -70,23 +70,43 @@ def userlogout(request):
 def home(request):
     if not request.user.is_authenticated:
         return redirect("login")
-
-    objects = Post.objects.filter(author=request.user)
-
+    list = []
+    posts = Post.objects.filter(author=request.user).order_by("-id")
+    for post in posts:
+        like_count = post.liked_by.all().count()
+        check = post.liked_by.filter(id=request.user.id)
+        if check:
+            list.append({'post': post, 'liked': True, 'like_count': like_count})
+        else:
+            list.append({'post': post, 'liked': False, 'like_count': like_count})
     query = request.GET.get("q")
     if query:
         return redirect("search")
 
-    return render(request,'home.html',{'list': objects, 'user': request.user})
+    return render(request,'home.html',{'list': list, 'user': request.user})
 
 def detail(request, author_id):
+    myuser = request.user
     user = User.objects.get(id=author_id)
-    objects = Post.objects.filter(author=user)
+    list = []
+    posts = Post.objects.filter(author=user).order_by("-id")
+    for post in posts:
+        like_count = post.liked_by.all().count()
+        check = post.liked_by.filter(id=request.user.id)
+        if check:
+            list.append({'post': post, 'liked': True, 'like_count': like_count})
+        else:
+            list.append({'post': post, 'liked': False, 'like_count': like_count})
     query = request.GET.get("q")
     if query:
         return redirect("search")
 
-    return render(request,'detail.html',{'list': objects, 'user': user})
+    following = False
+    if Connection.objects.filter(follower=myuser,following=user).exists():
+        following = True
+
+
+    return render(request,'detail.html',{'list': list, 'user': user, 'myuser': myuser, 'following':following})
 
 
 def create(request):
@@ -104,6 +124,7 @@ def create(request):
     "form": form,
     }
     return render(request, 'create.html', context)
+
 def search(request):
     query = request.GET.get("q")
     context = {
@@ -140,19 +161,82 @@ def updateprofile(request):
         profile_form = ProfileForm(instance=request.user.profile)
     return render(request, 'profile.html', { 'user_form': user_form,'profile_form': profile_form})
 
+
+def follow(request, author_id):
+    if not request.user:
+        messages.warning(request, "You need to login before you can follow people")
+        return redirect("login")
+    follower = User.objects.get(username=request.user)
+    following = User.objects.get(id=author_id)
+
+    if follower == following:
+        messages.warning(request,'You cannot follow yourself...')
+
+    else:
+        _, created = Connection.objects.get_or_create(follower=follower,following=following)
+
+        if created:
+            messages.success(request, "You are now following "+following.username)
+    return redirect("/account/"+str(author_id))
+
+def unfollow(request, author_id):
+    follower = User.objects.get(username=request.user)
+    following = User.objects.get(id=author_id)
+
+    unfollow = Connection.objects.get(
+        follower=follower,
+        following=following
+    )
+
+    if unfollow:
+        unfollow.delete()
+        messages.success(request, "You are now unfollowing " + following.username)
+
+    return redirect("/account/" + str(author_id))
+
+def feed(request):
+    following = Connection.objects.filter(follower=request.user)
+    posts = Post.objects.all().order_by("-id")
+    feed = []
+    for post in posts:
+        for account in following:
+            if post.author == account.following:
+                feed.append(post)
+    list = []
+    for post in feed:
+        like_count = post.liked_by.all().count()
+        check = post.liked_by.filter(id=request.user.id)
+        if check:
+            list.append({'post': post, 'liked': True, 'like_count': like_count})
+        else:
+            list.append({'post': post, 'liked': False, 'like_count': like_count})
+    context = {
+        'feed': list
+    }
+    return render(request, 'feed.html', context)
+
 def ajax_like(request, post_id):
     post = Post.objects.get(id=post_id)
-    new_like, created = Like.objects.get_or_create(user=request.user, post=post)
+    try:
+        post.liked_by.get(id=request.user.id)
+        post.liked_by.remove(request.user)
+        created = False
+    except:
+        post.liked_by.add(request.user)
+        created = True
 
     if created:
         action="like"
     else:
-        new_like.delete()
         action="unlike"
 
-    post_like_count = post.like_set.all().count()
+    post_like_count = post.liked_by.all().count()
     response = {
         "action": action,
         "post_like_count": post_like_count,
     }
     return JsonResponse(response, safe=False)
+
+
+
+

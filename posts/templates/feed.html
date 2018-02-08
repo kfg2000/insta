@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block heading %}
+Feed
+{% endblock heading %}
+
+{% block content %}
+
+
+<div class="rows">
+    {% for item in feed %}
+	<div class="card" style="width: 20rem;">
+        <p class="card-text">{{item.post.timestamp}}</p>
+        {% if item.post.image %}
+			<img class="img-fluid" src="{{item.post.image.url}}" alt="Card image cap">
+		{% endif %}
+        <button class="btn" onclick="ajax_like({{item.post.id}})">
+            <span id="like_count_for_{{item.post.id}}">{{item.like_count}}</span>
+		    <span ><i id="{{item.post.id}}" class="fa fa-heart {% if item.liked %}text-danger{% endif %}" aria-hidden="true"></i></span>
+        </button>
+        <p class="card-text">{{item.post.author}}: {{item.post.content}}</p>
+	</div>
+{% endfor %}
+</div>
+
+<script type="text/javascript">
+    function ajax_like(id) {
+        num = "#like_count_for_"+id
+        $.ajax(
+            {
+                type:'GET',
+                url: '/ajax_like/'+id,
+                error: function(){
+                    console.log('error');
+                },
+                success: function(data){
+                    $(num).text(data.post_like_count);
+
+                    if(data.action==="like"){
+                        $("#"+id).addClass("text-danger");
+                    }else{
+                        $("#"+id).removeClass("text-danger");
+                    }
+                },
+            }
+        );
+    }
+</script>
+
+{% endblock content %}
