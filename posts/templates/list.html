@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block heading %}
+List
+{% endblock heading %}
+
+
+{% block content %}
+<ul class="list-group">
+    {% for account in accounts %}
+    <li class="list-group-item">
+         <div class="row">
+        <div class="col-sm-1">
+                <img class="card-img-top" src="{{account.user.profile.profilePic.url}}" alt="Card image cap">
+        </div>
+             <h1><a class="btn btn-dark btn-lg" href="{% url 'detail' author_id=account.user.id %}">{{account.user}}</a></h1>
+
+
+        {% if account.following %}
+        <a style="position: absolute; right: 0;" class="btn btn-dark btn-lg" href="{% url 'unfollow' author_id=account.user.id %}" role="button">unfollow</a>
+        {% else %}
+        <a style="position: absolute; right: 0;" class="btn btn-dark btn-lg" href="{% url 'follow' author_id=account.user.id %}" role="button">follow</a>
+        {% endif %}
+
+         </div>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock content %}

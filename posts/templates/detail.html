@@ -1,29 +1,35 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 
 {% block heading %}
-Home
+{{user}}
 {% endblock heading %}
 
 {% block content %}
 
 <div class="card">
 <div class="rows">
-  <h1 class="display-12">{{user}}</h1>
   <p class="lead container">
       {% if user.profile.profilePic %}
         <div class="row">
             <div class="col-sm-2">
                 <img class="card-img-top" src="{{user.profile.profilePic.url}}" alt="Card image cap">
             </div>
-    <p class="card-text">{{user.profile.bio}}</p>
+    <h1 class="display-12">{{user}} <a class="btn btn btn-lg" href="{% url 'profile' %}" role="button">Edit Profile</a> <br>
+    <a class="btn btn-dark btn-lg" href="{% url 'followers' author_id=user.id %}" role="button">Followers: {{followers}}</a>     <a class="btn btn-dark btn-lg" href="{% url 'following' author_id=user.id %}" role="button">Following: {{following}}</a>
+    </h1>
+
         </div>
       {% endif %}
-    </p>
+  </p>
     <p class="lead">
-        {% if following %}
-        <a class="btn btn-primary btn-lg" href="{% url 'unfollow' author_id=user.id %}" role="button">unfollow</a>
+    <p class="card-text">{{user.profile.bio}}</p>
+  </p>
+    <p class="lead">
+        {% if following_check %}
+        <a class="btn btn-dark btn-lg" href="{% url 'unfollow' author_id=user.id %}" role="button">unfollow</a>
         {% else %}
-        <a class="btn btn-primary btn-lg" href="{% url 'follow' author_id=user.id %}" role="button">follow</a>
+        <a class="btn btn-dark btn-lg" href="{% url 'follow' author_id=user.id %}" role="button">follow</a>
         {% endif %}
     </p>
 </div>
@@ -31,7 +37,7 @@ Home
 
 <div class="rows">
     {% for item in list %}
-	<div class="card" style="width: 20rem;">
+	<div class="card mx-auto" style="width: 30rem;">
         <p class="card-text">{{item.timestamp}}</p>
         {% if item.post.image %}
 			<img class="img-fluid" src="{{item.post.image.url}}" alt="Card image cap">
@@ -43,6 +49,21 @@ Home
 
 
         <p class="card-text">{{item.post.author}}: {{item.post.content}}</p>
+        {% if item.comments %}
+        <div style="height:150px;width:480px;border:1px solid #ccc;font:16px/26px Georgia, Garamond, Serif;overflow:auto;">
+            Comments:
+        {% for comment in item.comments %}
+        <p class="card-text">{{comment.user}}: {{comment.blob}}</p>
+        {% endfor %}
+        </div>
+        {% endif %}
+        <p class="card-text">
+			  	<form action="{% url 'comment' post_id=item.post.id page='detail' %}" method="POST">
+			  		{% csrf_token %}
+                    {{form|crispy}}
+			  		<input type="submit" class="btn btn-outline-primary" value="Submit" />
+			  	</form>
+        </p>
 	</div>
 {% endfor %}
     </div>

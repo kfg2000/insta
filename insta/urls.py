@@ -33,6 +33,10 @@ urlpatterns = [
     path('unfollow/<int:author_id>', views.unfollow, name='unfollow'),
     path('feed/', views.feed, name='feed'),
     path('ajax_like/<int:post_id>', views.ajax_like, name='ajax_like'),
+    path('comment/<int:post_id>/<page>', views.comment, name='comment'),
+    path('following/<int:author_id>', views.followinglist, name='following'),
+    path('followers/<int:author_id>', views.followerslist, name='followers'),
+
 ]
 
 if settings.DEBUG:

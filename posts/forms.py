@@ -35,6 +35,7 @@ class UserForm(forms.ModelForm):
         fields = ('first_name', 'last_name', 'email')
 
 class CommentForm(forms.ModelForm):
+    blob = forms.CharField(widget=forms.Textarea, label='')
     class Meta:
         model = Comment
         fields = ['blob']

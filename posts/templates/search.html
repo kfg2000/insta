@@ -1,17 +1,28 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}
+{% block heading %}
 Search
-{% endblock title %}
+{% endblock heading %}
 
 
 {% block content %}
 <div class="row">
+    {% if nothing %}
+    No results founds...
+    {% endif %}
+<ul class="list-group">
     {% for user in users %}
-    <div class="card" style="width: 20rem;">
-    <a class="card-text" href="{% url 'detail' author_id=user.id %}">{{user}}</a>
+    <li class="list-group-item">
+         <div class="row">
+        <div class="col-sm-1">
+                <img class="card-img-top" src="{{user.profile.profilePic.url}}" alt="Card image cap">
         </div>
+             <h1><a class="btn btn-dark btn-lg" href="{% url 'detail' author_id=user.id %}">{{user}}</a></h1>
+
+         </div>
+        </li>
     {% endfor %}
+</ul>
 </div>
 {% endblock content %}

@@ -33,7 +33,9 @@ class Comment(models.Model):
 	timestamp = models.DateTimeField(auto_now_add=True)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE)
-	blob = models.TextField()
+	blob = models.TextField(blank=False)
+	def __str__(self):
+	    return self.blob
 
 
 @receiver(post_save, sender=User)
